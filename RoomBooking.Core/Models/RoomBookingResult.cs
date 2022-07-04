@@ -1,8 +1,8 @@
-﻿namespace RoomBooking.Core.Models;
+﻿using RoomBooking.Core.Enums;
 
-public record RoomBookingResult
+namespace RoomBooking.Core.Domain;
+
+public record RoomBookingResult : RoomBookingBase
 {
-    public string FullName { get; set; }
-    public string Email { get; set; }
-    public DateTime Date { get; set; }
+    public BookingSuccessFlag Flag { get; set; }
 }

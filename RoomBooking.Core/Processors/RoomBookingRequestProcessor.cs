@@ -2,13 +2,38 @@
 
 public class RoomBookingRequestProcessor
 {
+    private readonly IRoomBookingService _roomBookingService;
+
+    public RoomBookingRequestProcessor(IRoomBookingService roomBookingService)
+    {
+        this._roomBookingService = roomBookingService;
+    }
+
     public RoomBookingResult BookRoom(RoomBookingRequest bookingRequest)
     {
-        return new RoomBookingResult
+        if (bookingRequest == null)
+            throw new ArgumentNullException($"'{nameof(bookingRequest)}' can't be null");
+
+        var availableRooms = _roomBookingService.GetAvailableRooms(bookingRequest.Date);
+
+        if (availableRooms.Any())
         {
-            FullName = bookingRequest.FullName,
+            var room = availableRooms.First();
+
+            _roomBookingService.SaveBooking(CreateRoomBookingObject<RoomBook>(bookingRequest) with { RoomGuid = room.Guid });
+        }
+
+        return CreateRoomBookingObject<RoomBookingResult>(bookingRequest) with { Flag = availableRooms.Any() ? BookingSuccessFlag.Success : BookingSuccessFlag.Failure};
+    }
+
+    private TRoomBooking CreateRoomBookingObject<TRoomBooking>(RoomBookingRequest bookingRequest)
+        where TRoomBooking : RoomBookingBase, new()
+    {
+        return new TRoomBooking
+        {
+            Date = bookingRequest.Date,
             Email = bookingRequest.Email,
-            Date = bookingRequest.Date
+            FullName = bookingRequest.FullName,
         };
     }
 }
