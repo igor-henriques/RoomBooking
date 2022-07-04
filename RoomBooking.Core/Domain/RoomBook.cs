@@ -2,5 +2,6 @@
 
 public record RoomBook : RoomBookingBase
 {
-    public Guid RoomGuid { get; set; }
+    public long Id { get; set; }
+    public Guid RoomGuid { get; set; }    
 }

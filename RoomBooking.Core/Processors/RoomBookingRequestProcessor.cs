@@ -16,14 +16,23 @@ public class RoomBookingRequestProcessor
 
         var availableRooms = _roomBookingService.GetAvailableRooms(bookingRequest.Date);
 
+        var response = CreateRoomBookingObject<RoomBookingResult>(bookingRequest) with
+        {
+            Flag = availableRooms.Any() ? BookingSuccessFlag.Success : BookingSuccessFlag.Failure,
+        };
+
         if (availableRooms.Any())
         {
             var room = availableRooms.First();
 
-            _roomBookingService.SaveBooking(CreateRoomBookingObject<RoomBook>(bookingRequest) with { RoomGuid = room.Guid });
+            var roomBooking = CreateRoomBookingObject<RoomBook>(bookingRequest) with { RoomGuid = room.Guid };
+
+            _roomBookingService.SaveBooking(roomBooking);
+
+            response = response with { RoomBookId = roomBooking.Id };
         }
 
-        return CreateRoomBookingObject<RoomBookingResult>(bookingRequest) with { Flag = availableRooms.Any() ? BookingSuccessFlag.Success : BookingSuccessFlag.Failure};
+        return response;
     }
 
     private TRoomBooking CreateRoomBookingObject<TRoomBooking>(RoomBookingRequest bookingRequest)

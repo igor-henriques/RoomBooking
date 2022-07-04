@@ -89,5 +89,24 @@ public class RoomBookingRequestProcessorTest
 
         bookingFlag.ShouldBe(result.Flag);
     }
+
+    [Theory]
+    [InlineData(1, true)]
+    [InlineData(null, false)]
+    public void Should_Return_RoomBookingId_In_Result(long? roomBookId, bool isAvailable)
+    {
+        if (!isAvailable)
+            _availableRooms.Clear();
+
+        _roomBookingServiceMock.Setup(q => q.SaveBooking(It.IsAny<RoomBook>()))
+            .Callback<RoomBook>(booking =>
+            {
+                booking.Id = roomBookId.Value;
+            });
+
+        var result = _processor.BookRoom(_request);
+
+        result.RoomBookId.ShouldBe(roomBookId);
+    }
 }
 
